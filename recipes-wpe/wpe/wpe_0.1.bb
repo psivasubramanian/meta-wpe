@@ -14,12 +14,17 @@ DEPENDS += " \
 
 PV = "0.1+git${SRCPV}"
 
-SRCREV ?= "02007201b82e3b1bb103dbf34030c6cffb545dec"
+SRCREV ?= "622e996fc528212bd0453a076571261d28328d34"
 BASE_URI ?= "git://github.com/Metrological/WebKitForWayland.git;protocol=http;branch=master"
 SRC_URI = "${BASE_URI}"
 
 SRC_URI += "file://0000-minimumAccelerated2dCanvasSize-to-275x256.patch \
             file://0001-WebKitMacros-Append-to-I-and-not-to-isystem.patch \
+            file://0002-make-udev-conditional.patch \
+            file://0003-emev1-compile-fix-for-customdata.patch \
+            file://0004-nxclientdep-platformserver-support.patch \
+            file://0005-use-parser-type-plugins-for-bcmnexus.patch \
+            file://0006-uninitialized-var-bcm-nexus-backend.patch \
 "
 
 S = "${WORKDIR}/git"
@@ -32,11 +37,8 @@ WPE_BACKEND ?= "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'westeros', '
 WPE_BACKEND_append = "${@bb.utils.contains("MACHINE_FEATURES", "vc4graphics", " wayland","", d)}"
 WPE_BACKEND_remove = "${@bb.utils.contains("MACHINE_FEATURES", "vc4graphics", "westeros","", d)}"
 
-# The libprovision prebuilt libs currently support glibc ARM only.
-PROVISIONING ?= "${@bb.utils.contains("MACHINE_FEATURES", "vc4graphics", "", "provisioning", d)}"
+PROVISIONING ?= "provisioning"
 PROVISIONING_libc-musl = ""
-PROVISIONING_mipsel = ""
-PROVISIONING_x86 = ""
 PROVISIONING_hikey-32 = ""
 
 WL_BUFFER_MANAGEMENT ?= ""

@@ -1,0 +1,85 @@
+diff --git a/Source/ThirdParty/WPE-platform/CMakeLists.txt b/Source/ThirdParty/WPE-platform/CMakeLists.txt
+index 85342e5..348c30d 100644
+--- a/Source/ThirdParty/WPE-platform/CMakeLists.txt
++++ b/Source/ThirdParty/WPE-platform/CMakeLists.txt
+@@ -14,6 +14,7 @@ option(USE_WPE_BACKEND_DRM_TEGRA "Whether to enable support for the Tegra-specif
+ option(USE_WPE_BACKEND_WAYLAND "Whether to enable support for the Wayland WPE backend" OFF)
+ 
+ option(USE_WPE_INPUT_LIBINPUT "Whether to enable support for the libinput input backend" ON)
++option(USE_WPE_INPUT_UDEV "Whether to enable support for the libinput input udev lib" ON)
+ set(USE_KEY_INPUT_HANDLING_LINUX_INPUT OFF CACHE BOOL "Whether to use <linux/input.h> event codes for keyboard event handling")
+ 
+ find_package(GLIB 2.38.0 REQUIRED COMPONENTS gio gio-unix)
+@@ -73,16 +74,22 @@ set(WPE_PLATFORM_SOURCES
+ 
+ if (USE_WPE_INPUT_LIBINPUT)
+     find_package(Libinput REQUIRED)
+-    find_package(Libudev REQUIRED)
+-
+     list(APPEND WPE_PLATFORM_INCLUDE_DIRECTORIES
+         ${LIBINPUT_INCLUDE_DIRS}
+-        ${LIBUDEV_INCLUDE_DIRS}
+     )
+     list(APPEND WPE_PLATFORM_LIBRARIES
+         ${LIBINPUT_LIBRARIES}
+-        ${LIBUDEV_LIBRARIES}
+     )
++    if (USE_WPE_INPUT_UDEV)
++        find_package(Libudev REQUIRED)
++        list(APPEND WPE_PLATFORM_INCLUDE_DIRECTORIES
++            ${LIBUDEV_INCLUDE_DIRS}
++        )
++        list(APPEND WPE_PLATFORM_LIBRARIES
++            ${LIBUDEV_LIBRARIES}
++        )
++        add_definitions(-DKEY_INPUT_UDEV=1)
++    endif ()
+     list(APPEND WPE_PLATFORM_SOURCES
+         src/input/Libinput/KeyboardEventRepeating.cpp
+         src/input/Libinput/LibinputServer.cpp
+diff --git a/Source/ThirdParty/WPE-platform/src/input/Libinput/LibinputServer.cpp b/Source/ThirdParty/WPE-platform/src/input/Libinput/LibinputServer.cpp
+index 1061114..b3e1ba2 100644
+--- a/Source/ThirdParty/WPE-platform/src/input/Libinput/LibinputServer.cpp
++++ b/Source/ThirdParty/WPE-platform/src/input/Libinput/LibinputServer.cpp
+@@ -91,13 +91,16 @@ LibinputServer::LibinputServer()
+     , m_keyboardEventRepeating(new Input::KeyboardEventRepeating(*this))
+     , m_pointerCoords(0, 0)
+     , m_pointerBounds(1, 1)
++    , m_udev(nullptr)
+ #ifdef KEY_INPUT_HANDLING_VIRTUAL
+     , m_virtualkeyboard(nullptr)
+ #endif
+ {
++#ifdef KEY_INPUT_UDEV
+     m_udev = udev_new();
+     if (!m_udev)
+         return;
++#endif
+ 
+     m_libinput = libinput_udev_create_context(&g_interface, nullptr, m_udev);
+     if (!m_libinput)
+@@ -142,7 +145,9 @@ LibinputServer::~LibinputServer()
+     }
+ #endif
+     libinput_unref(m_libinput);
+-    udev_unref(m_udev);
++    if (m_udev) {
++        udev_unref(m_udev);
++    }
+ }
+ 
+ void LibinputServer::setClient(Client* client)
+diff --git a/Source/ThirdParty/WPE-platform/src/input/Libinput/LibinputServer.h b/Source/ThirdParty/WPE-platform/src/input/Libinput/LibinputServer.h
+index 8f9693c..323bf69 100644
+--- a/Source/ThirdParty/WPE-platform/src/input/Libinput/LibinputServer.h
++++ b/Source/ThirdParty/WPE-platform/src/input/Libinput/LibinputServer.h
+@@ -31,7 +31,9 @@
+ #include "KeyboardEventRepeating.h"
+ #include <glib.h>
+ #include <libinput.h>
++#ifdef KEY_INPUT_UDEV
+ #include <libudev.h>
++#endif
+ #include <memory>
+ #include <wpe/input.h>
+ 
