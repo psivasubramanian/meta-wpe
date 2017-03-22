@@ -4,12 +4,15 @@ LICENSE = "CLOSED"
 
 DEPENDS = "c-ares curl expat freetype graphite2 harfbuzz icu jpeg libmng libpng libwebp openssl"
 
-SRCREV = "a0b8cd13ad70bf670febf7f0a52686acb4ec636e"
+SRCREV = "f839254b17e030ec48d5269fe3ceb16a90441a42"
 PV = "4.2.3+git${SRCPV}"
 
-SRC_URI = "git://git@github.com/Metrological/netflix.git;protocol=ssh;branch=master"
-SRC_URI += "file://curlutils-stdint-include.patch"
-SRC_URI += "file://netflix.pc"
+SRC_URI = "git://git@github.com/Metrological/netflix.git;protocol=ssh;branch=master \
+           file://curlutils-stdint-include.patch \
+           file://0001-fix-build-with-musl-on-linux.patch \
+           file://0001-Do-not-compare-pointer-with-integer.patch \
+           file://netflix.pc \
+"
 
 S = "${WORKDIR}/git"
 
@@ -53,15 +56,13 @@ EXTRA_OECMAKE += " \
     -DCMAKE_INSTALL_PREFIX=${D}/release \
     -DBUILD_COMPILE_RESOURCES=ON \
     -DBUILD_DEBUG=OFF \
+    -DBUILD_PRODUCTION=ON \
     -DBUILD_SYMBOLS=OFF \
     -DBUILD_SHARED_LIBS=OFF \
     -DGIBBON_SCRIPT_JSC_DYNAMIC=OFF \
     -DGIBBON_SCRIPT_JSC_DEBUG=OFF \
     -DGIBBON_INPUT=devinput \
     -DNRDP_TOOLS=manufSSgenerator \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DBUILD_DEBUG=OFF \
-    -DBUILD_PRODUCTION=ON \
     -DGIBBON_MODE=shared \
 "
 

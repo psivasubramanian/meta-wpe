@@ -7,20 +7,31 @@ DEPENDS = "cppsdk libprovision"
 PV = "1.0.gitr${SRCPV}"
 
 SRCREV = "3f1ed46727fa51fc39135b8545857784a109f92e"
+
 SRC_URI = "git://git@github.com/Metrological/playready.git;protocol=ssh"
+SRC_URI += "file://playready.pc"
 
 inherit pkgconfig cmake
 
 S = "${WORKDIR}/git/src"
 
+PROVISIONING ?= "provisioning"
+PROVISIONING_libc-musl = ""
+
+PACKAGECONFIG ?= "${PROVISIONING}"
+
+PACKAGECONFIG[provisioning] = "-DPLAYREADY_USE_PROVISION=ON,-DPLAYREADY_USE_PROVISION=OFF,libprovision,libprovision"
+
 EXTRA_OECMAKE += " \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_C_FLAGS="-std=c99 -D_GNU_SOURCE ${TARGET_CC_ARCH} ${TOOLCHAIN_OPTIONS}" \
-	-DPLAYREADY_USE_PROVISION=ON \
 	-DBUILD_SHARED_LIBS=ON \
 "
 
 do_install_append() {
+        install -d ${D}${libdir}/pkgconfig
+        install -m 0644 ${WORKDIR}/playready.pc ${D}${libdir}/pkgconfig/
+
 	install -d ${D}${sysconfdir}/playready
 	if [ -f ${B}/package/playready/bgroupcert.dat ]; then
 		install -m 0644 ${B}/package/playready/bgroupcert.dat ${D}${sysconfdir}/playready/

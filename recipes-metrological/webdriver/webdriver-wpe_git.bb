@@ -8,6 +8,7 @@ DEPENDS = "curl glib-2.0 json-c wpe gyp-native"
 PV = "1.0+gitr${SRCPV}"
 
 SRC_URI = "git://git@github.com/Metrological/webdriver.git;protocol=ssh;branch=WD_1.X_dev \
+           file://0001-debugger_posix.cc-execinfo.h-is-glibc-uclibc-specifi.patch \
            file://chromium_base.pc \
            file://WebDriver_core.pc \
            file://WebDriver_extension_wpe_base.pc \
@@ -23,6 +24,7 @@ export WPE_STAGING_DIR = "${STAGING_DIR_TARGET}"
 export WPE_TARGET_DIR = "${STAGING_DIR_TARGET}"
 
 CPPFLAGS += "-I${STAGING_DIR_TARGET}/usr/include/glib-2.0 -I${STAGING_DIR_TARGET}/usr/lib/glib-2.0/include"
+CXXFLAGS += "-D_GLIBCXX_USE_CXX11_ABI=0"
 
 EXTRA_OEMAKE = "V=1 LIBS='-lWPEWebKit -lWPE -lglib-2.0 -ljson-c -lcurl -pthread -ldl'"
 

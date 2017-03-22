@@ -8,27 +8,32 @@ DEPENDS = "zlib"
 
 PV = "1.0+gitr${SRCPV}"
 
-SRC_URI = "git://git@github.com/Metrological/cppsdk.git;protocol=ssh;branch=stable"
+SRC_URI = "git://git@github.com/Metrological/cppsdk.git;protocol=ssh;branch=master \
+          "
 
-SRCREV = "f428df3fe60a75f95133ef99a69d46ad04ce5265"
+SRCREV = "e3224d996c7180d95821e8d0386101dca682abd2"
 
 S = "${WORKDIR}/git"
 
 inherit cmake pkgconfig
 
+CXXFLAGS += "-D_GLIBCXX_USE_CXX11_ABI=0"
+
 CPPSDK_PLATFORM ?= "platform-pc"
 CPPSDK_PLATFORM_mipsel = "platform-dawn"
 CPPSDK_PLATFORM_dawn = "platform-dawn"
+CPPSDK_PLATFORM_arm = "platform-eos"
 CPPSDK_PLATFORM_eos = "platform-eos"
 CPPSDK_PLATFORM_rpi = "platform-rpi"
 
 PACKAGECONFIG ?= "${CPPSDK_PLATFORM} cryptalgo generics process tracing websocket rpc"
 
-PACKAGECONFIG[platform-dawn] = "-DCPPSDK_PLATFORM=DAWN,,"
-PACKAGECONFIG[platform-eos] = "-DCPPSDK_PLATFORM=EOS,,"
+PACKAGECONFIG[platform-dawn] = "-DCPPSDK_PLATFORM=DAWN,,broadcom-refsw"
+PACKAGECONFIG[platform-eos] = "-DCPPSDK_PLATFORM=EOS,,broadcom-refsw"
 PACKAGECONFIG[platform-intelce] = "-DCPPSDK_PLATFORM=INTELCE,,intelce-osal intelce-cosai"
 PACKAGECONFIG[platform-pc] = "-DCPPSDK_PLATFORM=PC_UNIX,,"
 PACKAGECONFIG[platform-rpi] = "-DCPPSDK_PLATFORM=RPI,,virtual/egl"
+PACKAGECONFIG[platform-xi5] = "-DCPPSDK_PLATFORM=XI5,,broadcom-refsw"
 
 PACKAGECONFIG[cryptalgo] = "-DCPPSDK_CRYPTALGO=ON,-DCPPSDK_CRYPTALGO=OFF,"
 PACKAGECONFIG[debug] = "-DCPPSDK_DEBUG=ON,-DCPPSDK_DEBUG=OFF,"

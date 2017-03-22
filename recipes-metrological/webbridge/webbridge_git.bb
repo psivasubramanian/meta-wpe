@@ -10,51 +10,67 @@ DEPENDS = "cppsdk zlib"
 
 # Type 0 = Production, 1 = Release, 2 = Debug
 WEBBRIDGE_BUILD_TYPE = "0"
-WEBBRIDGE_BUILD_MAJOR = "1"
-WEBBRIDGE_BUILD_MINOR = "6"
-WEBBRIDGE_BUILD_REVISION = "4"
+WEBBRIDGE_BUILD_MAJOR = "2"
+WEBBRIDGE_BUILD_MINOR = "0"
+WEBBRIDGE_BUILD_REVISION = "0"
 
 PV = "${WEBBRIDGE_BUILD_MAJOR}.${WEBBRIDGE_BUILD_MINOR}.${WEBBRIDGE_BUILD_REVISION}+${SRCPV}"
 BASEPV = "${@ d.getVar('SRCPV', True).replace('AUTOINC+', '')}"
 
 # ----------------------------------------------------------------------------
 
-SRC_URI = "git://git@github.com/Metrological/webbridge.git;protocol=ssh;branch=stable"
-SRC_URI += "file://webbridge-init"
+SRC_URI = "git://git@github.com/Metrological/webbridge.git;protocol=ssh;branch=master \
+           file://0001-Remove-CPPSDK_INCLUDE_DIRS.patch \
+           file://webbridge-init \
+           file://webbridge.service.in \
+"
 
-SRCREV = "61bc55fc4df998f43642b6504a467c394e73cfe4"
+SRCREV = "6c5906ca76e060ddfe7bd7df592900fcd5f2fb05"
 
 S = "${WORKDIR}/git"
 
-inherit cmake pkgconfig update-rc.d
+inherit cmake pkgconfig update-rc.d systemd
+
+CXXFLAGS += "-D_GLIBCXX_USE_CXX11_ABI=0"
+
+SYSTEMD_SERVICE_${PN} = "webbridge.service"
 
 # ----------------------------------------------------------------------------
-
-PROVISIONING ?= "provisioning"
-PROVISIONING_libc-musl = ""
 
 SNAPSHOT ?= ""
 SNAPSHOT_rpi = "snapshot"
 
+WAYLAND_COMPOSITOR ?= "westeros.service"
+#WAYLAND_COMPOSITOR ?= "weston.service"
+
 WEBKITBROWSER_AUTOSTART ?= "true"
-WEBKITBROWSER_MEDIADISKCACHE ?= "n"
+WEBKITBROWSER_MEDIADISKCACHE ?= "false"
 WEBKITBROWSER_MEMORYPRESSURE ?= "databaseprocess:50m,networkprocess:100m,webprocess:300m,rpcprocess:50m"
 WEBKITBROWSER_MEMORYPROFILE ?= "128m"
 WEBKITBROWSER_STARTURL ?= "about:blank"
+WEBKITBROWSER_USERAGENT ?= "Mozilla/5.0 (Macintosh, Intel Mac OS X 10_11_4) AppleWebKit/602.1.28+ (KHTML, like Gecko) Version/9.1 Safari/601.5.17"
+WEBKITBROWSER_DISKCACHE ?= "0"
+WEBKITBROWSER_XHRCACHE ?= "false"
 
-PACKAGECONFIG ?= "dailserver deviceinfo monitor ${PROVISIONING} remotecontrol ${SNAPSHOT} tracecontrol webdriver webkitbrowser webproxy web-ui"
+WEBBRIDGE_PLUGIN_WEBSERVER_PORT ?= "8080"
+WEBBRIDGE_PLUGIN_WEBSERVER_BIND ?= "0.0.0.0"
+WEBBRIDGE_PLUGIN_WEBSERVER_PATH ?= "/var/www/"
+
+PACKAGECONFIG ?= "deviceinfo remotecontrol ${SNAPSHOT} tracecontrol webkitbrowser web-ui"
 
 PACKAGECONFIG[browser]            = "-DWEBBRIDGE_PLUGIN_BROWSER=ON,-DWEBBRIDGE_PLUGIN_BROWSER=OFF,"
 PACKAGECONFIG[dailserver]         = "-DWEBBRIDGE_PLUGIN_DIALSERVER=ON,-DWEBBRIDGE_PLUGIN_DIALSERVER=OFF,"
 PACKAGECONFIG[debug]              = "-DWEBBRIDGE_DEBUG=ON,-DWEBBRIDGE_DEBUG=OFF,"
 PACKAGECONFIG[deviceinfo]         = "-DWEBBRIDGE_PLUGIN_DEVICEINFO=ON,-DWEBBRIDGE_PLUGIN_DEVICEINFO=OFF,"
-PACKAGECONFIG[monitor]            = "-DWEBBRIDGE_PLUGIN_MONITOR=ON,DWEBBRIDGE_PLUGIN_MONITOR=OFF,"
+PACKAGECONFIG[monitor]            = "-DWEBBRIDGE_PLUGIN_MONITOR=ON,-DWEBBRIDGE_PLUGIN_MONITOR=OFF,"
 PACKAGECONFIG[netflix]            = "-DWEBBRIDGE_PLUGIN_NETFLIX=ON,-DWEBBRIDGE_PLUGIN_NETFLIX=OFF,netflix"
+PACKAGECONFIG[opencdmi]           = "-DWEBBRIDGE_PLUGIN_OPENCDMI=ON,-DWEBBRIDGE_PLUGIN_OPENCDMI=OFF,opencdmi"
 PACKAGECONFIG[provisioning]       = "-DWEBBRIDGE_PLUGIN_PROVISIONING=ON,-DWEBBRIDGE_PLUGIN_PROVISIONING=OFF,libprovision,libprovision"
 PACKAGECONFIG[queuecommunicator]  = "-DWEBBRIDGE_PLUGIN_QUEUECOMMUNICATOR=ON,-DWEBBRIDGE_PLUGIN_QUEUECOMMUNICATOR=OFF,"
 PACKAGECONFIG[remotecontrol]      = "-DWEBBRIDGE_PLUGIN_REMOTECONTROL=ON,-DWEBBRIDGE_PLUGIN_REMOTECONTROL=OFF,"
-PACKAGECONFIG[snapshot]           = "-DWEBBRIDGE_PLUGIN_SNAPSHOT=ON,,userland"
+PACKAGECONFIG[snapshot]           = "-DWEBBRIDGE_PLUGIN_SNAPSHOT=ON,,virtual/mesa"
 PACKAGECONFIG[tracecontrol]       = "-DWEBBRIDGE_PLUGIN_TRACECONTROL=ON,-DWEBBRIDGE_PLUGIN_TRACECONTROL=OFF,"
+PACKAGECONFIG[youtube]            = "-DWEBBRIDGE_PLUGIN_WEBKITBROWSER_YOUTUBE=ON, -DWEBBRIDGE_PLUGIN_WEBKITBROWSER_YOUTUBE=OFF,"
 PACKAGECONFIG[webdriver]          = "-DWEBBRIDGE_PLUGIN_WEBDRIVER=ON,-DWEBBRIDGE_PLUGIN_WEBDRIVER=OFF,webdriver-wpe"
 PACKAGECONFIG[webkitbrowser]      = "-DWEBBRIDGE_PLUGIN_WEBKITBROWSER=ON \
     -DWEBBRIDGE_PLUGIN_WEBKITBROWSER_AUTOSTART="${WEBKITBROWSER_AUTOSTART}" \
@@ -62,8 +78,17 @@ PACKAGECONFIG[webkitbrowser]      = "-DWEBBRIDGE_PLUGIN_WEBKITBROWSER=ON \
     -DWEBBRIDGE_PLUGIN_WEBKITBROWSER_MEMORYPRESSURE="${WEBKITBROWSER_MEMORYPRESSURE}" \
     -DWEBBRIDGE_PLUGIN_WEBKITBROWSER_MEMORYPROFILE="${WEBKITBROWSER_MEMORYPROFILE}" \
     -DWEBBRIDGE_PLUGIN_WEBKITBROWSER_STARTURL="${WEBKITBROWSER_STARTURL}" \
-    ,-DWEBBRIDGE_PLUGIN_WEBKITBROWSER=OFF,wpe"
+    -DWEBBRIDGE_PLUGIN_WEBKITBROWSER_USERAGENT="${WEBKITBROWSER_USERAGENT}" \
+    -DWEBBRIDGE_PLUGIN_WEBKITBROWSER_DISKCACHE="${WEBKITBROWSER_DISKCACHE}" \
+    -DWEBBRIDGE_PLUGIN_WEBKITBROWSER_XHRCACHE="${WEBKITBROWSER_XHRCACHE}" \
+    ,-DWEBBRIDGE_PLUGIN_WEBKITBROWSER=OFF,wpewebkit"
 PACKAGECONFIG[webproxy]           = "-DWEBBRIDGE_PLUGIN_WEBPROXY=ON,-DWEBBRIDGE_PLUGIN_WEBPROXY=OFF,"
+PACKAGECONFIG[webserver]          = "-DWEBBRIDGE_PLUGIN_WEBSERVER=ON \
+    -DWEBBRIDGE_PLUGIN_WEBSERVER_PORT="${WEBBRIDGE_PLUGIN_WEBSERVER_PORT}" \
+    -DWEBBRIDGE_PLUGIN_WEBSERVER_BINDING="${WEBBRIDGE_PLUGIN_WEBSERVER_BIND}" \
+    -DWEBBRIDGE_PLUGIN_WEBSERVER_PATH="${WEBBRIDGE_PLUGIN_WEBSERVER_PATH}" \
+    ,-DWEBBRIDGE_PLUGIN_WEBSERVER=OFF,"
+PACKAGECONFIG[webshell]           = "-DWEBBRIDGE_PLUGIN_WEBSHELL=ON,-DWEBBRIDGE_PLUGIN_WEBSHELL=OFF,"
 PACKAGECONFIG[web-ui]             = "-DWEBBRIDGE_WEB_UI=ON,-DWEBBRIDGE_WEB_UI=OFF,"
 
 EXTRA_OECMAKE += "\
@@ -87,9 +112,33 @@ EXTRA_OECMAKE += "\
 "
 # ----------------------------------------------------------------------------
 
+do_configure_append() {
+    for f in `find ${B} -name "*.make"`; do
+        sed -i -e 's#-I${STAGING_INCDIR_NATIVE}##g' $f
+    done
+}
+
 do_install_append() {
-    install -d ${D}${sysconfdir}/init.d
-    install -m 0755 ${WORKDIR}/webbridge-init ${D}${sysconfdir}/init.d/webbridge
+    if ${@bb.utils.contains("PACKAGECONFIG", "webserver", "true", "false", d)}
+    then
+        install -d ${D}${WEBBRIDGE_PLUGIN_WEBSERVER_PATH}
+    fi 
+    if ${@bb.utils.contains("DISTRO_FEATURES", "systemd", "true", "false", d)}
+    then
+        if ${@bb.utils.contains("MACHINE_FEATURES", "platformserver", "true", "false", d)}
+        then
+           extra_after=""
+        elif ${@bb.utils.contains("PREFERRED_PROVIDER_virtual/egl", "broadcom-refsw", "true", "false", d)}
+        then
+           extra_after="nxserver.service"
+        fi
+        extra_after="${extra_after} ${WAYLAND_COMPOSITOR}"
+        install -d ${D}${systemd_unitdir}/system
+        sed -e "s|@EXTRA_AFTER@|${extra_after}|g" < ${WORKDIR}/webbridge.service.in > ${D}${systemd_unitdir}/system/webbridge.service
+    else
+        install -d ${D}${sysconfdir}/init.d
+        install -m 0755 ${WORKDIR}/webbridge-init ${D}${sysconfdir}/init.d/webbridge
+    fi
 }
 
 # ----------------------------------------------------------------------------
