@@ -4,7 +4,7 @@ LICENSE = "CLOSED"
 
 DEPENDS = "c-ares curl expat freetype graphite2 harfbuzz icu jpeg libmng libpng libwebp openssl"
 
-SRCREV = "f839254b17e030ec48d5269fe3ceb16a90441a42"
+SRCREV = "3b65c09bea75bd085f495b5be174320410ec7fc9"
 PV = "4.2.3+git${SRCPV}"
 
 SRC_URI = "git://git@github.com/Metrological/netflix.git;protocol=ssh;branch=master \
@@ -43,6 +43,9 @@ PACKAGECONFIG[default] = "-DGIBBON_GRAPHICS=null \
                         -DDPI_REFERENCE_AUDIO_RENDERER=openmax-il \
                         -DDPI_REFERENCE_AUDIO_MIXER=none \
                         ,,ffmpeg libomxil"
+
+# Generic switches
+PACKAGECONFIG[DDPLUS] = "-DDPI_REFERENCE_HAVE_DDPLUS=true,,,"
 
 # DRM
 PACKAGECONFIG[playready] = "-DDPI_REFERENCE_DRM=playready,-DDPI_REFERENCE_DRM=none,playready,playready"

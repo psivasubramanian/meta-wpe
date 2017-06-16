@@ -1,6 +1,8 @@
 
 # **meta-wpe**
 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=55UJZHTXW8VTE)
+
 `meta-wpe` is a meta layer for OpenEmbedded / Yocto environments. It provides the necessary recipes to build the WebPlatformforEmbedded components including the WPE WebKit browser.
 
 # Setup
@@ -42,7 +44,7 @@ you can use raspberrypi2 as well if you own raspberrypi2 machine.
 
 Set GCC to use version 5.4:
 
-`GCC_VERSION_forcevariable = "5.4%"`
+`GCCVERSION = "5.4%"`
 
 Note: GCC 6.x is supported but experimental at this stage. Mileage may vary.
 
