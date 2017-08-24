@@ -15,8 +15,8 @@ DEPENDS += " \
 
 PV = "0.1+git${SRCPV}"
 
-SRCREV ?= "7130609c60d1afcdf86deb9ebaa5468e379d8737"
-BASE_URI ?= "git://github.com/WebPlatformForEmbedded/WPEWebKit.git;protocol=http;branch=stable"
+SRCREV ?= "c7df008590dde472c9efc5d4ddd56d7a9b9eaca5"
+BASE_URI ?= "git://github.com/WebPlatformForEmbedded/WPEWebKit.git;protocol=http;branch=master"
 SRC_URI = "${BASE_URI}"
 
 SRC_URI += "file://0001-WebKitMacros-Append-to-I-and-not-to-isystem.patch \
@@ -118,7 +118,6 @@ do_install() {
     install -m 0755 ${B}/lib/libWPEWebInspectorResources.so ${D}${libdir}/
     # Hack: Remove the RPATH embedded in libWPEWebKit.so
     chrpath --delete ${D}${libdir}/libWPE*
-    ln -sf libWPEBackend-rdk.so ${D}${libdir}/libWPEBackend-default.so
 
     install -d ${D}${bindir}
     install -m755 ${B}/bin/WPEWebProcess ${D}${bindir}/
