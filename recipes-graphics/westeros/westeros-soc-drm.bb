@@ -7,6 +7,8 @@ S = "${WORKDIR}/git/drm"
 
 COMPATIBLE_MACHINE = "(hikey-32|dragonboard-410c-32|dragonboard-820c-32|poplar|imx)"
 
+COMPATIBLE_MACHINE_rpi = "${@bb.utils.contains('MACHINE_FEATURES', 'vc4-graphics', 'raspberrypi3-64', '', d)}"
+
 DEPENDS = "wayland virtual/egl glib-2.0 libdrm"
 
 PROVIDES = "westeros-soc"
