@@ -74,7 +74,7 @@ Or change the local configuration:
 $ vi /etc/WPEFramework/plugins/WebKitBrowser.json
 ```
 
-In the JSON file, edit the URL key/value. Save and restart the box or reload WPEFramework through systemctl or sysinit.
+In the JSON file, edit the URL key/value. Save and restart the box or reload WPEFramework through systemctl or sysinit. Alternatively we can access the service controller from host using IP displayed on the HDMI screen.
 
 To change what WPEFramework loads, such as turn on/off plugins or interact with the service through another way please see the [WPEFramework](https://github.com/WebPlatformForEmbedded/meta-wpe/wiki/WPEFramework) page on our wiki.
 
